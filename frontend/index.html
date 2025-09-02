@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Recommender System</title>
+  <style>
+    body {
+      background-image: url("https://images.pexels.com/photos/259280/pexels-photo-259280.jpeg?cs=srgb&dl=pexels-pixabay-259280.jpg&fm=jpg"); /* farmland image */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.85); /* transparent white background */
+      padding: 20px 30px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+      width: 480px;       
+      max-width: 90%;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #2b6777;
+      font-size: 26px;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 12px;
+      font-size: 15px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 14px;
+      background: #2b6777;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e4d56;
+    }
+    #result {
+      margin-top: 25px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: #2b6777;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🌱🌾 Crop Recommender System 🌾🌱</h2>
+    <form id="predictForm">
+      <label for="N">Nitrogen (N)</label>
+      <input type="number" name="N" required>
+
+      <label for="P">Phosphorus (P)</label>
+      <input type="number" name="P" required>
+
+      <label for="K">Potassium (K)</label>
+      <input type="number" name="K" required>
+
+      <label for="temperature">Temperature (°C)</label>
+      <input type="number" step="any" name="temperature" required>
+
+      <label for="humidity">Humidity (%)</label>
+      <input type="number" step="any" name="humidity" required>
+
+      <label for="ph">pH</label>
+      <input type="number" step="any" name="ph" required>
+
+      <label for="rainfall">Rainfall (mm)</label>
+      <input type="number" step="any" name="rainfall" required>
+
+      <button type="submit">Get Crop Recommendation</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById("predictForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      let formData = new FormData(e.target);
+      let data = Object.fromEntries(formData.entries());
+
+      Object.keys(data).forEach(key => data[key] = Number(data[key]));
+
+      let response = await fetch("http://127.0.0.1:5000/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      let result = await response.json();
+      if(result.error){
+        document.getElementById("result").innerText = "Error: " + result.error;
+      } else {
+        document.getElementById("result").innerHTML =
+          "🌱 Recommended Crop: <b>" + result.prediction + "</b><br>" +
+          "Confidence: " + (result.confidence ? (result.confidence*100).toFixed(2) + "%" : "N/A");
+      }
+    };
+  </script>
+</body>
+</html>
